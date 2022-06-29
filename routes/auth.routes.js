@@ -29,4 +29,5 @@ router.post('/signup', (req, res, next) => {
 
 router.get('/userProfile', (req, res) => res.render('users/user-profile.hbs'));
 
+
 module.exports = router;
