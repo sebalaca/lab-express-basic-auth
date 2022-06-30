@@ -1,9 +1,11 @@
 const { Router } = require('express');
 const router = new Router();
+
+const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
+
 const User = require('../models/User.model');
-const mongoose = require('mongoose');
 
 router.get('/signup', (req, res) => res.render('auth/signup'));
 
@@ -83,8 +85,16 @@ router.post('/login', (req, res, next) => {
     .catch(error => next(error));
 });
 
-router.get('/userProfile', (req, res) => {
-  res.render('users/user-profile', { userInSession: req.session.currentUser });
+router.get("/userProfile", (req, res) => {
+  res.render("users/user-profile", { userInSession: req.session.currentUser });
 });
+
+//Cerrar sesion usuario
+// router.post('/logout', (req, res, next) => {
+//   req.session.destroy(err => {
+//     if (err) next(err);
+//     res.redirect('/');
+//   });
+// });
 
 module.exports = router;
