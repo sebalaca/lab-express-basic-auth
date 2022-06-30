@@ -7,10 +7,12 @@ const saltRounds = 10;
 
 const User = require('../models/User.model');
 
-router.get('/signup', (req, res) => res.render('auth/signup'));
+const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard.js');
+
+router.get('/signup', isLoggedOut, (req, res) => res.render('auth/signup'));
 
 //Creamos Usuario - SingUp
-router.post('/signup', (req, res, next) => {
+router.post('/signup', isLoggedOut, (req, res, next) => {
     // console.log("The form data: ", req.body);
    
     //Verifica que los campos username y password esten completos o tengan valores
@@ -56,9 +58,9 @@ router.post('/signup', (req, res, next) => {
 // router.get('/userProfile', (req, res) => res.render('users/user-profile.hbs'));
 
 //Inicio de sesion - LogIn
-router.get('/login', (req, res) => res.render('auth/login'));
+router.get('/login', isLoggedOut, (req, res) => res.render('auth/login'));
 
-router.post('/login', (req, res, next) => {
+router.post('/login', isLoggedOut, (req, res, next) => {
   console.log('SESSION =====> ', req.session);
   const { username, password } = req.body;
  
@@ -85,12 +87,12 @@ router.post('/login', (req, res, next) => {
     .catch(error => next(error));
 });
 
-router.get("/userProfile", (req, res) => {
-  res.render("users/user-profile", { userInSession: req.session.currentUser });
+router.get('/userProfile', isLoggedIn, (req, res) => {
+  res.render('users/user-profile', { userInSession: req.session.currentUser });
 });
 
 //Cerrar sesion usuario
-router.post("/logout", (req, res) => {
+router.post("/logout", isLoggedIn, (req, res) => {
   req.session.destroy();
   res.redirect("/");
 });
