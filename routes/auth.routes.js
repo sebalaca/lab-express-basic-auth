@@ -3,19 +3,29 @@ const router = new Router();
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
 const User = require('../models/User.model');
-// const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 router.get('/signup', (req, res) => res.render('auth/signup'));
 
+//Creamos Usuario
 router.post('/signup', (req, res, next) => {
     // console.log("The form data: ", req.body);
    
+    //Verifica que los campos username y password esten completos o tengan valores
     const { username, password } = req.body;
     if (!username || !password) {
-      res.render('auth/signup', { errorMessage: 'All fields are mandatory. Please provide your username, and password.' });
+      res.render('auth/signup', { errorMessage: 'All fields are mandatory. Please provide your username and password.' });
       return;
     }
-   
+    //Verifica la fortaleza de la contraseña
+    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+    if (!regex.test(password)) {
+      res
+        .status(500)
+        .render('auth/signup', { errorMessage: 'Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.' });
+      return;
+    }
+   //Encripta contraseña
     bcryptjs
     .genSalt(saltRounds)
     .then(salt => bcryptjs.hash(password, salt))
@@ -28,7 +38,17 @@ router.post('/signup', (req, res, next) => {
     .then(userFromDB => {
       res.redirect('/userProfile');
     })
-    .catch(error => next(error));
+    .catch(error => {
+      // if (error instanceof mongoose.Error.ValidationError) {
+      //   res.status(500).render('auth/signup', { errorMessage: error.message });
+      if (error.code === 11000) {
+        res.status(500).render('auth/signup', {
+           errorMessage: 'Username need to be unique. This username is already used.' //Verifica que no exista el username en BBDD
+        });
+      } else {
+        next(error);
+      }
+    });
 });
 
 router.get('/userProfile', (req, res) => res.render('users/user-profile.hbs'));
