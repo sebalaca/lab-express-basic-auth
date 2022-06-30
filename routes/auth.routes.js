@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 router.get('/signup', (req, res) => res.render('auth/signup'));
 
-//Creamos Usuario
+//Creamos Usuario - SingUp
 router.post('/signup', (req, res, next) => {
     // console.log("The form data: ", req.body);
    
@@ -53,5 +53,31 @@ router.post('/signup', (req, res, next) => {
 
 router.get('/userProfile', (req, res) => res.render('users/user-profile.hbs'));
 
+//Inicio de sesion - LogIn
+router.get('/login', (req, res) => res.render('auth/login'));
+
+router.post('/login', (req, res, next) => {
+  const { username, password } = req.body;
+ 
+  if (username === '' || password === '') {
+    res.render('auth/login', {
+      errorMessage: 'Please enter both, username and password to login.'
+    });
+    return;
+  }
+ 
+  User.findOne({ username })
+    .then(user => {
+      if (!user) {
+        res.render('auth/login', { errorMessage: 'Username is not registered. Try with other username.' });
+        return;
+      } else if (bcryptjs.compareSync(password, user.passwordHash)) {
+        res.render('users/user-profile', { user });
+      } else {
+        res.render('auth/login', { errorMessage: 'Incorrect password.' });
+      }
+    })
+    .catch(error => next(error));
+});
 
 module.exports = router;
