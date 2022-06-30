@@ -90,11 +90,8 @@ router.get("/userProfile", (req, res) => {
 });
 
 //Cerrar sesion usuario
-// router.post('/logout', (req, res, next) => {
-//   req.session.destroy(err => {
-//     if (err) next(err);
-//     res.redirect('/');
-//   });
-// });
-
+router.post("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
+});
 module.exports = router;
